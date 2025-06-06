@@ -6,7 +6,7 @@ This dbt project models professional wrestling event data for analytics and repo
 
 ---
 
-## Product Structure 
+## Project Structure 
 
 This project is organized into logical layers, following best practices for modular, maintainable analytics engineering. Each layer serves a distinct purpose in the data pipeline:
 
