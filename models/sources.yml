@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: pro_wrestling_events            # Logical source name used in dbt
+    database: pro-wrestling-analytics         # Replace with your actual GCP project ID (if needed)
+    schema: pro_wrestling_events          # BigQuery dataset name
+    tables:
+      - name: raw_events                  # Table name in BigQuery
+        description: Raw events data for pro wrestling events
