@@ -30,3 +30,4 @@ left join {{ ref('dim_arena') }} a
 
 left join {{ ref('dim_location') }} l
   on f.dim_location_key = l.dim_location_key
+where e.brand in ('AEW', 'WWE')
