@@ -2,7 +2,7 @@
 
 ## Overview
 
-This dbt project models professional wrestling event data for analytics and reporting. It currently focuses on **WWE and AEW events from 2019-2025**. It implements a classic star schema, with clear separation between staging, dimension, fact, and reporting layers. The project is designed for flexibility, scalability, and ease of use in BI tools.
+This dbt project models professional wrestling event data for analytics and reporting. It currently focuses on **WWE and AEW events from 2021-2025**. It implements a classic star schema, with clear separation between staging, dimension, fact, and reporting layers. The project is designed for flexibility, scalability, and ease of use in BI tools.
 
 ---
 
