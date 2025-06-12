@@ -1,5 +1,6 @@
 select 
     d.calendar_date,
+    e.promotion,
     e.event_name,
     e.event_type,
     e.event_show_name,
@@ -11,6 +12,7 @@ select
     l.event_state,
     l.event_country,
     m.match_type,
+    f.is_match_stipulation,
     m.match_winner,
     m.match_loser,
     m.match_ended_by,
