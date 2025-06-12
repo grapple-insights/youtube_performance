@@ -16,7 +16,8 @@ select
     m.match_ended_by,
     m.match_time_limit,
     m.match_title_change,
-    m.match_duration_seconds
+    m.match_duration_seconds,
+    fe.event_attendance
 from {{ ref("fact_pro_wrestling_matches") }} f 
 
 left join {{ ref('dim_date') }} d
@@ -33,3 +34,9 @@ left join {{ ref('dim_location') }} l
 
 left join {{ ref('dim_match' )}} m
 on f.dim_match_key = m.dim_match_key
+
+left join {{ ref("fact_pro_wrestling_events") }} fe 
+on f.dim_date_key = fe.dim_date_key
+and f.dim_arena_key = fe.dim_arena_key
+and f.dim_location_key = fe.dim_location_key
+and f.dim_event_key = fe.dim_event_key
