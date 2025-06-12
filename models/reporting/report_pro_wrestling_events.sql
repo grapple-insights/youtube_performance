@@ -18,8 +18,8 @@ select
     m.match_ended_by,
     m.match_time_limit,
     m.match_title_change,
-    m.match_duration_seconds,
-    fe.event_attendance
+    m.match_duration_seconds
+    -- fe.event_attendance
 from {{ ref("fact_pro_wrestling_matches") }} f 
 
 left join {{ ref('dim_date') }} d

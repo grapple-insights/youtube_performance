@@ -16,14 +16,12 @@ left join
     {{ ref("dim_arena") }} a
     on (stg.event_arena_name = a.event_arena_name)
     or (stg.event_arena_name is null and a.event_arena_name is null)
-left join
-    {{ ref("dim_location") }} l
-    on (stg.match_city = l.event_city)
-    or (stg.match_city is null and l.event_city is null)
-    and (stg.match_state = l.event_state)
-    or (stg.match_state is null and l.event_state is null)
-    and (stg.match_country = l.event_country)
-    or (stg.match_country is null and l.event_country is null)
+left join {{ ref("dim_location") }} l
+    on (
+        stg.match_city = l.event_city
+        and stg.match_state = l.event_state
+        and stg.match_country = l.event_country
+    )
 left join
     {{ ref("dim_match") }} m
     on stg.calendar_date = m.calendar_date
