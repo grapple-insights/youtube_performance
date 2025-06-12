@@ -2,7 +2,7 @@
 
 ## Overview
 
-This dbt project models professional wrestling event data for analytics and reporting. It currently focuses on **WWE and AEW events from 2019-2025**. It implements a classic star schema, with clear separation between staging, dimension, fact, and reporting layers. The project is designed for flexibility, scalability, and ease of use in BI tools.
+This dbt project models professional wrestling event data for analytics and reporting. It currently focuses on **WWE and AEW events from 2021-2025**. It implements a classic star schema, with clear separation between staging, dimension, fact, and reporting layers. The project is designed for flexibility, scalability, and ease of use in BI tools.
 
 ---
 
@@ -30,12 +30,16 @@ dim_location.sql: Unique locations (city, state, country).
 
 dim_date.sql: Calendar dates.
 
+dim_match.sql: Unique matches at the event.
+
 3. Fact Layer (models/facts/)
 Purpose: Contains event-level records for attendance, referencing dimension tables via surrogate keys and storing business measures.
 
 Example:
 
 fact_pro_wrestling_events.sql: Stores each wrestling event, with links to all dimensions.
+
+fact_pro_wrestling_matches.sql: Stores each wrestling match, with links to all dimensions.
 
 4. Reporting Layer (models/reporting/)
 Purpose: Joins fact and dimension tables into a single, denormalized table for efficient BI reporting and dashboarding.
@@ -50,16 +54,18 @@ Purpose: Documents all models and columns, and defines dbt tests for data qualit
 ## Data Flow
 
 1. **Staging Layer**
-   - Cleans and standardizes raw event data (`stage_pro_wrestling_events.sql`).
+   - Cleans and standardizes raw event data (`stage_pro_wrestling_events.sql`, `stage_pro_wrestling_matches`).
 
 2. **Dimension Layer**
    - `dim_event`: Parsed event details (brand, event name, show number, show name, event type, broadcast type, broadcast network).
    - `dim_arena`: Unique list of arenas.
    - `dim_location`: Unique locations (city, state, country).
    - `dim_date`: Calendar date dimension.
+   - `dim_match`: Parsed match details (winner, loser, stipulation, title change, etc)
 
 3. **Fact Layer**
    - `fact_pro_wrestling_events`: Contains foreign keys to all dimensions and measures such as attendance.
+   - `fact_pro_wrestling_matches`: Contains foreign keys to all dimensions and measures such as match duration.
 
 4. **Reporting Layer**
    - `report_pro_wrestling_events.sql`: Joins the fact table with all dimensions, providing an analytics-ready table for BI and dashboards.
