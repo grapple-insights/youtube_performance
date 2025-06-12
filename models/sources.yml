@@ -7,3 +7,5 @@ sources:
     tables:
       - name: raw_events                  # Table name in BigQuery
         description: Raw events data for pro wrestling events
+      - name: raw_matches                 # Table name in BigQuery
+        description: Raw matches data for pro wrestling events

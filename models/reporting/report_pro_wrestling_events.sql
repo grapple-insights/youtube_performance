@@ -1,23 +1,23 @@
 select 
-    d.calendar_date
-    , d.calendar_year
-    , d.day_name
-    , d.month_name
-    , d.calendar_quarter
-    , d.is_weekend
-    , e.brand
-    , e.event_name
-    , e.event_type
-    , e.broadcast_type
-    , e.broadcast_network
-    , e.show_name
-    , e.show_number
-    , a.arena_name
-    , l.city
-    , l.state
-    , l.country
-    , f.attendance
-from {{ ref('fact_pro_wrestling_events') }} f
+    d.calendar_date,
+    e.event_name,
+    e.event_type,
+    e.event_show_name,
+    e.event_show_number,
+    e.event_broadcast_type,
+    e.event_broadcast_network,
+    a.event_arena_name,
+    l.event_city,
+    l.event_state,
+    l.event_country,
+    m.match_type,
+    m.match_winner,
+    m.match_loser,
+    m.match_ended_by,
+    m.match_time_limit,
+    m.match_title_change,
+    m.match_duration_seconds
+from {{ ref("fact_pro_wrestling_matches") }} f 
 
 left join {{ ref('dim_date') }} d
   on f.dim_date_key = d.dim_date_key
@@ -30,3 +30,6 @@ left join {{ ref('dim_arena') }} a
 
 left join {{ ref('dim_location') }} l
   on f.dim_location_key = l.dim_location_key
+
+left join {{ ref('dim_match' )}} m
+on f.dim_match_key = m.dim_match_key

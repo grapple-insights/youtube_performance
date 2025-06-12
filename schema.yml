@@ -2,158 +2,238 @@ version: 2
 
 models:
   - name: stage_pro_wrestling_events
-    description: Raw and lightly cleaned pro wrestling events data, including all columns from the source system. This is the foundation for all downstream models.
+    description: >
+      Staging table for raw pro wrestling events extracted from cagematch.net, 
+      filtered for dates after 2021-01-01 and event types TV-Show, Pay Per View, or Premium Live Event.
     columns:
-      - name: event_name
-        description: The raw event name as provided by the source.
       - name: calendar_date
-        description: The event date.
-      - name: arena
-        description: The name of the arena where the event took place.
-      - name: location
-        description: The full location string (city, state, country).
+        description: Event date (parsed from raw date string)
+        tests:
+          - not_null
+
+      - name: promotion
+        description: >
+          Promotion or brand for the event. Standardized to AEW if AEW or NJPW is present in the brand list.
+        tests:
+          - not_null
+
+      - name: event_name
+        description: >
+          Clean event name, stripped of brands, show numbers, and extraneous tags.
+        tests:
+          - not_null
+
       - name: event_type
-        description: The type of event (e.g., TV Show, Pay Per View).
-      - name: broadcast_type
-        description: The broadcast type (e.g., Live, Taped).
-      - name: broadcast_network
-        description: The network or platform where the event aired.
-      - name: attendance
-        description: The reported attendance for the event.
+        description: Type of event (TV-Show, Pay Per View, Premium Live Event)
+        tests:
+          - accepted_values:
+              values: ['TV-Show', 'Pay Per View', 'Premium Live Event']
+
+      - name: event_show_name
+        description: >
+          Show name or subtitle if present (e.g., 'Night 1', 'Saturday'), otherwise null.
+
+      - name: event_show_number
+        description: Show number extracted from event name, if present.
+
+      - name: event_arena_name
+        description: Name of the arena where the event took place.
+
+      - name: event_city
+        description: City where the event was held.
+
+      - name: event_state
+        description: State or province where the event was held.
+
+      - name: event_country
+        description: Country where the event was held.
+
+      - name: event_broadcast_type
+        description: Broadcast type for the event (e.g., PPV, TV, PLE).
+
+      - name: event_broadcast_network
+        description: Broadcast network for the event.
+
+      - name: event_attendance
+        description: Event attendance (cleaned and cast as integer).
+
+      - name: event_name_original
+        description: Original event name from the raw data.
+
+      - name: event_location_original
+        description: Original location string from the raw data.
 
   - name: dim_event
-    description: Dimension table containing parsed and standardized event details, including brand, event name, show number, show name, event type, broadcast type, and broadcast network.
+    description: >
+      Dimension table for unique wrestling events, generated from the stage_pro_wrestling_events model.
+      Uses a surrogate key for uniqueness and joins.
     columns:
       - name: dim_event_key
-        description: Surrogate key for the event dimension.
+        description: >
+          Surrogate key for the event, generated using dbt_utils.generate_surrogate_key on:
+          promotion, event_name, event_type, event_show_name, event_show_number,
+          event_broadcast_type, event_broadcast_network, calendar_date.
         tests:
           - unique
           - not_null
-      - name: brand
-        description: The promotion or brand (e.g., WWE, AEW).
-      - name: event_name
-        description: The parsed event name.
-      - name: show_number
-        description: The show number if available.
-      - name: show_name
-        description: The show name or subtitle, if present.
-      - name: event_type
-        description: The type of event (e.g., TV Show, Pay Per View).
-      - name: broadcast_type
-        description: The broadcast type (e.g., Live, Taped).
-      - name: broadcast_network
-        description: The network or platform where the event aired.
-      - name: event_name_full
-        description: The fully parsed event name string for joining.
 
-  - name: dim_arena
-    description: Dimension table of unique arenas where events are held.
+      - name: calendar_date
+        description: Event date.
+
+      - name: promotion
+        description: Promotion or brand for the event.
+
+      - name: event_name
+        description: Clean event name.
+
+      - name: event_type
+        description: Event type (TV-Show, Pay Per View, Premium Live Event).
+
+      - name: event_show_name
+        description: Show name or subtitle if present.
+
+      - name: event_show_number
+        description: Show number extracted from event name, if present.
+
+      - name: event_broadcast_type
+        description: Broadcast type for the event.
+
+      - name: event_broadcast_network
+        description: Broadcast network for the event.
+
+  - name: dim_match
+    description: >
+      Dimension table for unique wrestling matches, generated from the stage_pro_wrestling_matches model.
+      Uses a surrogate key for uniqueness and joins to dim_event.
     columns:
-      - name: dim_arena_key
-        description: Surrogate key for the arena dimension.
+      - name: dim_match_key
+        description: >
+          Surrogate key for the match, generated using dbt_utils.generate_surrogate_key on:
+          calendar_date, promotion, event_name, event_type, event_show_number, event_show_name,
+          match_type, match_winner, match_loser, match_ended_by, match_duration_seconds, match_title_change.
         tests:
           - unique
           - not_null
-      - name: arena_name
-        description: The name of the arena.
-        tests:
-          - unique
-          - not_null
+
+      - name: calendar_date
+        description: Event date.
+
+      - name: promotion
+        description: Promotion or brand for the event.
+
+      - name: event_name
+        description: Clean event name.
+
+      - name: event_type
+        description: Event type (TV-Show, Pay Per View, Premium Live Event).
+
+      - name: event_show_number
+        description: Show number extracted from event name, if present.
+
+      - name: event_show_name
+        description: Show name or subtitle if present.
+
+      - name: event_arena_name
+        description: Name of the arena where the event took place.
+
+      - name: match_type
+        description: Type or stipulation of the match.
+
+      - name: match_winner
+        description: Winner(s) of the match.
+
+      - name: match_loser
+        description: Loser(s) of the match.
+
+      - name: match_ended_by
+        description: Method by which the match ended (e.g., pinfall, submission).
+
+      - name: match_duration_seconds
+        description: Match duration in seconds.
+
+      - name: match_time_limit
+        description: Time limit for the match, if specified.
+
+      - name: match_title_change
+        description: Boolean indicating if a title changed hands.
+
+      - name: dim_event_key
+        description: Foreign key to the dim_event table.
 
   - name: dim_location
-    description: Dimension table of unique event locations, broken out by city, state, and country.
+    description: >
+      Dimension table for unique event locations, generated from the stage_pro_wrestling_events model.
+      Uses a surrogate key for uniqueness and joins.
     columns:
       - name: dim_location_key
-        description: Surrogate key for the location dimension.
+        description: >
+          Surrogate key for the location, generated using dbt_utils.generate_surrogate_key on:
+          event_city, event_state, event_country.
         tests:
           - unique
           - not_null
-      - name: location_full
-        description: The full location string (city, state, country).
-        tests:
-          - unique
-          - not_null
-      - name: city
+
+      - name: event_city
         description: City where the event was held.
-      - name: state
-        description: State or region where the event was held.
-      - name: country
+
+      - name: event_state
+        description: State or province where the event was held.
+
+      - name: event_country
         description: Country where the event was held.
 
   - name: dim_date
-    description: Calendar date dimension table.
+    description: >
+      Date dimension table generated from unique calendar dates in stage_pro_wrestling_events.
+      Provides standard calendar attributes for joining and reporting.
     columns:
       - name: dim_date_key
-        description: Surrogate key for the date dimension.
-        tests:
-          - unique
-          - not_null
-      - name: calendar_date
-        description: The actual calendar date.
+        description: >
+          Surrogate key for the date, formatted as yyyymmdd integer (e.g., 20240612).
         tests:
           - unique
           - not_null
 
-  - name: fact_pro_wrestling_events
-    description: Fact table containing one row per wrestling event, with foreign keys to all dimensions and measures like attendance.
-    columns:
-      - name: dim_event_key
-        description: Foreign key to dim_event.
+      - name: calendar_date
+        description: Calendar date in DATE format.
         tests:
+          - unique
           - not_null
-          - relationships:
-              to: ref('dim_event')
-              field: dim_event_key
+
+      - name: calendar_year
+        description: Four-digit year extracted from calendar_date.
+
+      - name: day_name
+        description: Name of the day of week (e.g., 'Monday').
+
+      - name: month_name
+        description: Name of the month (e.g., 'January').
+
+      - name: calendar_quarter
+        description: Calendar quarter (1-4).
+
+      - name: week_of_year
+        description: ISO week number of the year.
+
+      - name: day_of_year
+        description: Day of the year (1-366).
+
+      - name: is_weekend
+        description: Boolean indicating if the date is a Saturday or Sunday.
+
+  - name: dim_arena
+    description: >
+      Dimension table for unique arenas, generated from the stage_pro_wrestling_events model.
+      Uses a surrogate key for uniqueness and joins.
+    columns:
       - name: dim_arena_key
-        description: Foreign key to dim_arena.
+        description: >
+          Surrogate key for the arena, generated using dbt_utils.generate_surrogate_key on event_arena_name.
         tests:
+          - unique
           - not_null
-          - relationships:
-              to: ref('dim_arena')
-              field: dim_arena_key
-      - name: dim_location_key
-        description: Foreign key to dim_location.
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_location')
-              field: dim_location_key
-      - name: dim_date_key
-        description: Foreign key to dim_date.
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_date')
-              field: dim_date_key
-      - name: attendance
-        description: The reported attendance for the event.
 
-  - name: report_pro_wrestling_events
-    description: Denormalized reporting model joining the fact and all dimension tables for easy BI and dashboarding.
-    columns:
-      - name: calendar_date
-        description: The event date.
-      - name: brand
-        description: The promotion or brand (e.g., WWE, AEW).
-      - name: event_name
-        description: The parsed event name.
-      - name: show_number
-        description: The show number if available.
-      - name: show_name
-        description: The show name or subtitle, if present.
-      - name: event_type
-        description: The type of event (e.g., TV Show, Pay Per View).
-      - name: broadcast_type
-        description: The broadcast type (e.g., Live, Taped).
-      - name: broadcast_network
-        description: The network or platform where the event aired.
-      - name: arena_name
-        description: The name of the arena.
-      - name: city
-        description: City where the event was held.
-      - name: state
-        description: State or region where the event was held.
-      - name: country
-        description: Country where the event was held.
-      - name: attendance
-        description: The reported attendance for the event.
+      - name: event_arena_name
+        description: Name of the arena where the event took place.
+        tests:
+          - not_null
