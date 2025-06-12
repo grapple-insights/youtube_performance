@@ -237,3 +237,67 @@ models:
         description: Name of the arena where the event took place.
         tests:
           - not_null
+
+  - name: report_pro_wrestling_events
+    description: >
+      Reporting model joining match-level and event-level data for pro wrestling analytics.
+      Combines dimensions, fact tables, and attendance for use in BI tools and dashboards.
+    columns:
+      - name: calendar_date
+        description: Event date.
+
+      - name: event_name
+        description: Name of the event.
+
+      - name: event_type
+        description: Type of event (TV-Show, Pay Per View, Premium Live Event).
+
+      - name: event_show_name
+        description: Show name or subtitle if present.
+
+      - name: event_show_number
+        description: Show number extracted from event name, if present.
+
+      - name: event_broadcast_type
+        description: Broadcast type for the event (e.g., PPV, TV, PLE).
+
+      - name: event_broadcast_network
+        description: Broadcast network for the event.
+
+      - name: event_arena_name
+        description: Name of the arena where the event took place.
+
+      - name: event_city
+        description: City where the event was held.
+
+      - name: event_state
+        description: State or province where the event was held.
+
+      - name: event_country
+        description: Country where the event was held.
+
+      - name: match_type
+        description: Type or stipulation of the match.
+
+      - name: match_winner
+        description: Winner(s) of the match.
+
+      - name: match_loser
+        description: Loser(s) of the match.
+
+      - name: match_ended_by
+        description: Method by which the match ended (e.g., pinfall, submission).
+
+      - name: match_time_limit
+        description: Time limit for the match, if specified.
+
+      - name: match_title_change
+        description: Boolean indicating if a title changed hands.
+
+      - name: match_duration_seconds
+        description: Match duration in seconds.
+
+      - name: event_attendance
+        description: >
+          Attendance for the event, sourced from event-level fact table.
+
