@@ -55,8 +55,9 @@ select
                 ''
             )
             is null
-            and regexp_contains(lower(match), r'time limit draw')
-        then regexp_extract(match, r'^(.*) - Time Limit Draw')
+            and regexp_contains(lower(match), r' vs\. ')
+        then regexp_extract(match, r'^(.*? vs\. .*?)(?: -| \(|$)')
+
         else null
     end as match_time_limit,
 
@@ -207,3 +208,4 @@ select
 
 from {{ source("pro_wrestling_events", "raw_matches") }}
 where safe.parse_date('%d.%m.%Y', `date`) is not null
+    
