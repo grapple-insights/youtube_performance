@@ -8,6 +8,7 @@ select
     case
         when m.match_time_limit is not null then true else false
     end as is_time_limit_draw,
+    case when lower(m.match_type) like '%title%' then true else false end as is_title_match,
     m.match_title_change as is_match_title_change,
     m.match_duration_seconds
 from {{ ref("stage_pro_wrestling_matches") }} stg
