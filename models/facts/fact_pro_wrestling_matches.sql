@@ -59,5 +59,8 @@ left join
         (stg.match_ended_by = m.match_ended_by)
         or (stg.match_ended_by is null and m.match_ended_by is null)
     )
-    and stg.match_duration_seconds = m.match_duration_seconds
+     and (
+        (stg.match_duration_seconds = m.match_duration_seconds)
+        or (stg.match_duration_seconds is null and m.match_duration_seconds is null)
+    )
     and stg.match_title_change = m.match_title_change
