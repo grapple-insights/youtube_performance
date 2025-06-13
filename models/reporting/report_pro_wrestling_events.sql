@@ -13,6 +13,7 @@ select
     l.event_country,
     m.match_type,
     f.is_match_stipulation,
+    f.is_title_match,
     m.match_winner,
     m.match_loser,
     m.match_ended_by,
