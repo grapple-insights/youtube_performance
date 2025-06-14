@@ -246,6 +246,9 @@ models:
       - name: calendar_date
         description: Event date.
 
+      - name: promotion
+        description: Name of promotion.
+
       - name: event_name
         description: Name of the event.
 
@@ -278,6 +281,12 @@ models:
 
       - name: match_type
         description: Type or stipulation of the match.
+
+      - name: is_match_stipulation
+        description: Flags if a match has a stipulation (ie ladder match).
+
+      - name: is_title_match
+        description: Flags if the match is a title match.
 
       - name: match_winner
         description: Winner(s) of the match.
