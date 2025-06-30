@@ -114,6 +114,6 @@ Add calculated fields or additional joins to `reporting.sql` as needed for your 
 
 ## Support & Contributions
 
-For questions, suggestions, or contributions, please contact [Bryan Sauka] or open an issue in this repository.
+For questions, suggestions, or contributions, please contact Bryan Sauka or open an issue in this repository.
 
 ---
