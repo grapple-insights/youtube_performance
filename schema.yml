@@ -1,0 +1,406 @@
+version: 2
+
+models:
+  - name: stage_youtube_api_metrics
+    description: >
+      Staging model for YouTube API metrics data. Extracted from the `raw_youtube` source table.
+      Includes video metadata, performance statistics, and derived flags like `is_short` and `is_full_match`.
+
+    columns:
+      - name: channel_name
+        description: Name of the YouTube channel.
+
+      - name: channel_id
+        description: Unique identifier for the YouTube channel.
+        tests:
+          - not_null
+
+      - name: channel_subscribers
+        description: Subscriber count reported for the channel at the time of pull.
+
+      - name: video_id
+        description: Unique identifier for the YouTube video.
+        tests:
+          - not_null
+          - unique
+
+      - name: video_url
+        description: Full URL to the video on YouTube.
+
+      - name: video_name
+        description: Title of the video.
+
+      - name: video_description
+        description: Text description of the video provided by the uploader.
+
+      - name: video_upload_date
+        description: Upload date provided by the YouTube API.
+
+      - name: video_published_timestamp_utc
+        description: Timestamp of when the video was published, in UTC.
+
+      - name: video_views
+        description: Total view count for the video as of the latest API pull.
+
+      - name: video_likes
+        description: Total like count for the video.
+
+      - name: video_comments
+        description: Total comment count for the video.
+
+      - name: video_duration_seconds
+        description: Duration of the video in seconds.
+
+      - name: video_definition
+        description: Definition or resolution setting of the video (e.g., hd or sd).
+
+      - name: is_video_caption
+        description: Boolean flag indicating whether captions are available for the video.
+
+      - name: video_topic_categories
+        description: List of topic categories assigned to the video by YouTube.
+
+      - name: video_tags
+        description: List of tag strings included in the video metadata.
+
+      - name: video_thumbnail_url
+        description: URL for the thumbnail image associated with the video.
+
+      - name: is_licensed_content
+        description: Boolean indicating whether the content is licensed material.
+
+      - name: is_short
+        description: Boolean flag for whether the video duration is 60 seconds or less.
+
+      - name: is_full_match
+        description: Boolean flag indicating if the video was inferred to be a full match based on the title.
+
+  - name: dim_date
+    description: >
+      Date dimension table with one row per day. Includes keys and attributes for calendar year,
+      month, quarter, weekday name, and whether the date falls on a weekend. Used to filter, group,
+      and join against fact tables via `dim_date_key`.
+
+    columns:
+      - name: dim_date_key
+        description: Surrogate key for the date in `YYYYMMDD` format.
+        tests:
+          - not_null
+          - unique
+
+      - name: calendar_date
+        description: Actual calendar date (ISO format).
+
+      - name: calendar_year
+        description: 4-digit calendar year (e.g., 2024)
+
+      - name: calendar_quarter
+        description: Calendar quarter as Q1, Q2, Q3, or Q4 (numeric 1–4).
+
+      - name: calendar_month
+        description: Numeric month of the year (1–12).
+
+      - name: calendar_day_name
+        description: Name of the day of the week (e.g., Monday, Tuesday).
+
+      - name: calendar_month_name
+        description: Full month name (e.g., January, February).
+
+      - name: is_weekend
+        description: Boolean flag indicating whether the date falls on a Saturday or Sunday.
+
+  - name: dim_channel
+    description: >
+      Channel dimension table created from YouTube video records. Keeps only the latest
+      metadata per `channel_id`, based on most recent `video_upload_date`. Used to store
+      channel-level information such as name and subscriber count.
+
+    columns:
+      - name: dim_channel_key
+        description: Surrogate key for the channel dimension, generated from `channel_id`.
+        tests:
+          - not_null
+          - unique
+
+      - name: channel_id
+        description: Unique identifier for the YouTube channel.
+        tests:
+          - not_null
+          - unique
+
+      - name: channel_name
+        description: Display name of the YouTube channel.
+        tests:
+          - not_null
+
+      - name: channel_subscribers
+        description: Most recent subscriber count associated with the channel. Updated based on the latest video upload.
+
+  - name: dim_video
+    description: >
+      Dimension table for YouTube videos, derived from the staging layer.
+      Includes metadata, tags, timestamps, and derived content-type flags for categorization.
+      Surrogate key is generated from the `video_id` to support joins with fact models.
+
+    columns:
+      - name: dim_video_key
+        description: Surrogate key for the video, derived from `video_id`.
+        tests:
+          - not_null
+          - unique
+
+      - name: video_id
+        description: Unique identifier for the YouTube video.
+        tests:
+          - not_null
+          - unique
+
+      - name: channel_id
+        description: YouTube channel ID for the video.
+        tests:
+          - not_null
+        # Optional: Add a relationship if you want to connect to dim_channel
+        # tests:
+        #   - relationships:
+        #       to: ref('dim_channel')
+        #       field: channel_id
+
+      - name: video_name
+        description: The title of the video.
+
+      - name: video_description
+        description: The full text description provided by the uploader.
+
+      - name: video_url
+        description: URL for viewing the video on YouTube.
+
+      - name: video_thumbnail_url
+        description: URL to the video's thumbnail image.
+
+      - name: video_tags
+        description: List of tags provided for the video metadata.
+
+      - name: video_topic_categories
+        description: YouTube-inferred topic categories, if available.
+
+      - name: video_upload_date
+        description: The date the video was originally uploaded.
+
+      - name: video_published_timestamp_utc
+        description: Timestamp of when the video was published on the channel.
+
+      - name: video_published_hour_utc
+        description: Hour of the day (UTC) the video was published.
+
+      - name: video_published_on_weekend
+        description: Boolean flag indicating if the video was published on a Saturday or Sunday.
+
+      - name: video_duration_seconds
+        description: Duration of the video in seconds.
+
+      - name: video_definition
+        description: Quality of the video playback (e.g., "hd", "sd").
+
+      - name: is_video_caption
+        description: Boolean flag for whether the video includes captions.
+
+      - name: is_licensed_content
+        description: Boolean indicating whether the video contains licensed content.
+
+      - name: is_short
+        description: Boolean flag indicating whether the video is 60 seconds or less (YouTube Shorts style).
+
+      - name: is_full_match
+        description: Boolean flag indicating the video is a full match, based on pattern matching in the title.
+
+      - name: video_name_length
+        description: The character length of the video title.
+
+  - name: dim_tag
+    description: >
+      Dimension table for YouTube video tags. Extracted by splitting the `video_tags` field from `dim_video`,
+      cleaning each tag, and assigning a surrogate key. Used to analyze tag-level performance and to join
+      with bridge tables for many-to-many relationships.
+
+    columns:
+      - name: dim_tag_key
+        description: Surrogate key for the tag, generated from the tag string.
+        tests:
+          - not_null
+          - unique
+
+      - name: tag_name
+        description: Cleaned tag value extracted from the video metadata.
+        tests:
+          - not_null
+          - unique
+
+  - name: bridge_video_tag
+    description: >
+      Bridge table mapping YouTube videos to individual tags. Built from splitting the
+      `video_tags` field in `dim_video` and linking to tag dimension keys. Supports many-to-many
+      relationships between videos and tags via `dim_video_key` and `dim_tag_key`.
+
+    columns:
+      - name: dim_tag_key
+        description: Surrogate key identifying a unique tag from `dim_tag`.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_tag')
+              field: dim_tag_key
+
+      - name: dim_video_key
+        description: Surrogate key identifying the video from `dim_video`.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_video')
+              field: dim_video_key
+
+  - name: fact_video_daily_performance
+    description: >
+      Fact table containing YouTube video performance metrics per video and upload date.
+      Joins dimensions for channel, video, and date, and includes core metrics like views, likes,
+      comments, and derived indicators like video engagement rate, `is_short`, and `is_full_match`.
+
+    columns:
+      - name: dim_date_key
+        description: Foreign key to the date dimension representing the video upload date.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: dim_date_key
+
+      - name: dim_channel_key
+        description: Foreign key to the channel dimension.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_channel')
+              field: dim_channel_key
+
+      - name: dim_video_key
+        description: Foreign key to the video dimension (surrogate key for the video).
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_video')
+              field: dim_video_key
+
+      - name: is_short
+        description: Boolean flag indicating the video is 60 seconds or shorter (YouTube Short).
+
+      - name: is_full_match
+        description: Boolean flag indicating the video is a full match based on title pattern matching.
+
+      - name: video_views
+        description: Total number of views recorded on the video.
+
+      - name: video_likes
+        description: Total number of likes recorded on the video.
+
+      - name: video_comments
+        description: Total number of comments recorded on the video.
+
+      - name: video_duration_seconds
+        description: Length of the video in seconds.
+
+      - name: video_engagement_rate
+        description: Calculated as (likes + comments) / views. Indicates user engagement.
+
+  - name: report_video_daily_performance
+    description: >
+      Flattened reporting model combining video performance metrics with channel, video,
+      and calendar attributes. Designed for dashboarding, exploration, and stakeholder reports.
+      Based on the `fact_video_daily_performance` table joined to `dim_date`, `dim_channel`, and `dim_video`.
+
+    columns:
+      - name: calendar_date
+        description: The calendar date when the video was uploaded.
+
+      - name: calendar_day_name
+        description: Name of the day of the week (e.g., Monday, Tuesday).
+
+      - name: calendar_month_name
+        description: Full name of the month (e.g., January, February).
+
+      - name: calendar_quarter
+        description: Quarter of the year in which the video was uploaded (1–4).
+
+      - name: channel_id
+        description: Business key for the YouTube channel.
+
+      - name: channel_name
+        description: Display name of the YouTube channel.
+
+      - name: video_id
+        description: Business key for the YouTube video.
+
+      - name: video_name
+        description: Title of the video.
+
+      - name: video_description
+        description: Description text associated with the video.
+
+      - name: video_url
+        description: Full URL to view the video on YouTube.
+
+      - name: video_thumbnail_url
+        description: URL pointing to the thumbnail image for the video.
+
+      - name: video_published_timestamp_utc
+        description: Exact UTC timestamp when the video was published.
+
+      - name: video_published_hour_utc
+        description: UTC hour of day when the video was published (0–23).
+
+      - name: video_duration_seconds
+        description: Total length of the video in seconds.
+
+      - name: video_views
+        description: Number of views the video received.
+
+      - name: video_likes
+        description: Number of likes the video received.
+
+      - name: video_comments
+        description: Number of comments the video received.
+
+      - name: video_engagement_rate
+        description: Engagement rate = (likes + comments) / views.
+
+      - name: is_short
+        description: Flag indicating the video is 60 seconds or less (YouTube Short).
+
+      - name: is_full_match
+        description: Flag indicating whether the video is a full match (based on title).
+
+  - name: report_tag_daily_performance
+    description: >
+      Daily tag-level attribution report. Allocates video views, likes, and comments across associated tags 
+      using equal-weighted contribution (1 / number of tags). Includes engagement rate calculated at the tag level 
+      and grouped by calendar date, channel name, and tag name. Enables tag-level performance analysis across multiple channels.
+
+    columns:
+      - name: calendar_date
+        description: The calendar date when the video was uploaded.
+
+      - name: channel_name
+        description: The name of the YouTube channel (from the channel dimension).
+
+      - name: tag_name
+        description: The tag extracted from video metadata and mapped in the tag dimension.
+
+      - name: attributed_views
+        description: Sum of views allocated to this tag, divided equally across all tags on each video.
+
+      - name: attributed_likes
+        description: Sum of likes allocated to this tag, divided equally across all tags on each video.
+
+      - name: attributed_comments
+        description: Sum of comments allocated to this tag, divided equally across all tags on each video.
+
+      - name: attributed_engagement_rate
+        description: Engagement rate allocated to this tag, calculated as (likes + comments) / views using the same tag share logic.
