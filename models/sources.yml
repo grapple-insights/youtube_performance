@@ -1,4 +1,4 @@
-version: 2
+version: 2 
 
 sources:
   - name: analytics_prod          # Logical name for the source group

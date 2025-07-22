@@ -17,4 +17,4 @@ with
     )
 
 select *
-from joined
+from joined 

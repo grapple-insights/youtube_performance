@@ -12,4 +12,4 @@ round((stg.video_likes + stg.video_comments) / nullif(stg.video_views, 0), 3) as
 from {{ ref("stage_youtube_api_metrics") }} stg 
 left join {{ ref("dim_date") }} d on stg.video_upload_date = d.calendar_date
 left join {{ ref("dim_channel") }} c on stg.channel_id = c.channel_id
-left join {{ ref("dim_video") }} v on stg.video_id = v.video_id
+left join {{ ref("dim_video") }} v on stg.video_id = v.video_id 

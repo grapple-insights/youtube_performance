@@ -18,4 +18,4 @@ JOIN (
 ) tag_count ON f.dim_video_key = tag_count.dim_video_key
 LEFT JOIN {{ ref("dim_date") }} d ON f.dim_date_key = d.dim_date_key
 GROUP BY d.calendar_date, dc.channel_name, t.tag_name
-ORDER BY d.calendar_date, dc.channel_name, t.tag_name
+ORDER BY d.calendar_date, dc.channel_name, t.tag_name 

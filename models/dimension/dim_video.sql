@@ -1,4 +1,4 @@
-{{ config(materialized="table", tags=["dimension"]) }}
+{{ config(materialized="table", tags=["dimension"]) }} 
 
 with
     source as (select * from {{ ref("stage_youtube_api_metrics") }}),

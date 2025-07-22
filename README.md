@@ -1,4 +1,4 @@
-# YouTube Performance 📊
+# YouTube Performance 📊 
 
 This dbt project transforms raw YouTube API data from a central analytics data source into clean, tested, and documented data models for analyzing video performance, content types, and viewer engagement across multiple channels.
 
@@ -113,7 +113,7 @@ To contribute:
 
 ## 📬 Questions?
 
-Feel free to reach out to Bryan Sauka.
+Feel free to reach out to Grapple Insights.
 
 ---
 

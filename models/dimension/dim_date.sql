@@ -1,4 +1,4 @@
-{{ config(materialized="table", tags=["dimension"]) }}
+{{ config(materialized="table", tags=["dimension"]) }} 
 
 with
     numbers as (

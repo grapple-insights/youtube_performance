@@ -1,4 +1,4 @@
-version: 2
+version: 2 
 
 models:
   - name: stage_youtube_api_metrics

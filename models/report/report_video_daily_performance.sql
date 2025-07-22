@@ -1,4 +1,4 @@
-select 
+select  
 d.calendar_date,
 d.calendar_day_name,
 d.calendar_month_name,
