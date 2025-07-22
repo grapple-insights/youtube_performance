@@ -1,0 +1,23 @@
+select 
+channel_title as channel_name,
+channel_id,
+subscriber_count as channel_subscribers,
+video_id,
+video_url,
+title as video_name,
+description as video_description,
+upload_date as video_upload_date,
+published_time as video_published_timestamp_utc,
+view_count as video_views,
+like_count as video_likes,
+comment_count as video_comments,
+duration_seconds as video_duration_seconds,
+definition as video_definition,
+caption as is_video_caption,
+topic_categories as video_topic_categories,
+tags as video_tags,
+thumbnail_url as video_thumbnail_url,
+licensed_content as is_licensed_content,
+case when duration_seconds <= 60 then true else false end as is_short,
+lower(title) like '%full match%' as is_full_match
+from {{ source('analytics_prod', 'raw_youtube') }} 

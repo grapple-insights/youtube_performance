@@ -1,0 +1,10 @@
+version: 2 
+
+sources:
+  - name: analytics_prod          # Logical name for the source group
+    database: grapple-insights    # Project name
+    schema: analytics_prod        # Your BigQuery dataset (schema) name
+    tables:
+      - name: raw_youtube         # Table name in BigQuery
+        description: >
+          Raw YouTube Analytics data for WWE/AEW, including video and channel metrics ingested from the YouTube API.
